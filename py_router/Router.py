@@ -17,6 +17,7 @@ class Router:
     return self.__pathMiddlewares
 
   def addRoute(self, path, method, *handler):
+    path = '/{path}/'.format(path = path.strip('/')) if path != '/' else path
     pathData = { method: handler } if not path in self.paths else { **self.paths[path], **{ method: handler } }
     self.__paths.update({ path: pathData})
     return self

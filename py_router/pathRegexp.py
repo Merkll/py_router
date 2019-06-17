@@ -7,14 +7,12 @@ class PathMatch:
       of the parameters is returned
     """
     # strips tailing / from paths to handle their presence or absense
-    path = '/{path}/'.format(path = path.strip('/'))
-    route = '/{route}/'.format(route = route.strip('/'))
+    path = '/{path}/'.format(path = path.strip('/')) if path != '/' else path
+    route = '/{route}/'.format(route = route.strip('/')) if route != '/' else route
 
     paramNames = re.findall(r':(.*?)/', path) # get names of parameters in path
-    pathregex = re.sub(r':(.*?)/', '(.*?)/', path) # substitute all parameters with matching regular exp
-    pathregex = '/{pathregex}/'.format(pathregex = pathregex.strip('/'))
-    matched = re.match(pathregex, route) # matches the route
-    print(pathregex, route)
+    pathregex = re.sub(r':(.*?)/', '([^/]*?)/', path).strip('/') # substitute all parameters with matching regular exp
+    matched = re.match(f'{pathregex}$', route.strip('/')) # matches the route
 
     if not matched:
       return None
@@ -26,12 +24,7 @@ class PathMatch:
     """
       This searches a list of paths and finds a match against a route 
     """
-    print(paths, route)
-    matched = list(filter(lambda path : self.match(path, route), paths))
-    return matched
-
-
-print(PathMatch().match('/users/:user/', '/users/45/about'))
-# print(PathMatch().matchMulti(['/users/:user/:about/', '/users/:user/' ], '/users/45/about'))
-
-  
+    # print(paths, route)
+    matched = list(map(lambda path : self.match(path, route), paths))
+    matched = list(filter(None, matched))
+    return matched[0] if len(matched) >= 1 else None

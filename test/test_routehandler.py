@@ -12,24 +12,24 @@ class TestRouter(unittest.TestCase):
       self.assertEqual(middlewares, [])
 
     def test_executeMiddlewares(self):
-      self.handler.Router.use(lambda data: data)
+      self.handler.Router.use(lambda data, *others: data)
       data = self.handler.executeMiddlewares({ 'path': '/' })
       self.assertEqual(data, [{ 'path': '/' }])
 
     def test_executeMiddlewares_should_modifydata(self):
-      def method(data):
+      def method(data, *others):
         data['method'] = 'get'
         return data
       self.handler.Router.use(method)
       data = self.handler.executeMiddlewares({ 'path': '/' })
-      self.assertEqual(data, [{ 'path': '/', 'method': 'get' }])
+      self.assertIn({ 'path': '/', 'method': 'get' }, data )
 
     def test_executerouteHandler(self):
       def method(req, *other):
         req['message'] = 'Hello World'
         return req['message']
       self.handler.Router.get('/', method)
-      data = self.handler.executeRouteHandlers('/', 'get', { 'path': '/' })
+      data = self.handler.executeRouteHandlers({ 'path': '/' })
       self.assertEqual(data, ['Hello World'])
 
     def test_handleRequest(self):
