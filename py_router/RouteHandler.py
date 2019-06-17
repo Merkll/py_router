@@ -61,7 +61,3 @@ class RouteHandler(metaclass = Singleton):
   def register(self, mode = None):
     self.__mode = mode
     return self.handleRequest
-  
-# han = RouteHandler()
-# han.Router.get('/users/:user/data', lambda req, *others: req)
-# print(han.register()({'path': '/users/user/data'}))
