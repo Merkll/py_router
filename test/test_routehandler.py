@@ -47,4 +47,12 @@ class TestRouter(unittest.TestCase):
       self.handler.Router.get('/', method)
       data = self.handler.register()({ 'path': '/' }, method)
       self.assertEqual(data, ['Hello World!!'])
+
+    def test_register_AwsLambdaMode(self):
+      def method(req, *other):
+        req['message'] = 'Hello World from post!!'
+        return req['message']
+      self.handler.Router.post('/', method)
+      data = self.handler.register('aws-lambda')({ 'path': '/', 'httpMethod': 'POST' }, method)
+      self.assertEqual(data, ['Hello World from post!!'])
     

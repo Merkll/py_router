@@ -1,6 +1,8 @@
 from .Router import Router
 from .pathRegexp import PathMatch
+from .aws_mode import AwsLambdaMode
 from types import SimpleNamespace
+
 
 class Singleton(type):
     _instances = {}
@@ -13,7 +15,9 @@ class RouteHandler(metaclass = Singleton):
   def __init__(self):
     self.__router = Router()
     self.__mode = None
-    self.__modeHandlers = {}
+    self.__modeHandlers = {
+      'aws-lambda': AwsLambdaMode()
+    }
 
   @property
   def Router(self):
@@ -38,7 +42,7 @@ class RouteHandler(metaclass = Singleton):
   def executeRouteHandlers(self, req, *handler):
     paths = self.Router.paths
     path = req.get('path')
-    method = req.get('method') or 'get'
+    method = (req.get('method') or 'get').lower()
     currentRoute = paths.get(path) or {}
     routeHandler = currentRoute.get(method) or currentRoute.get('all') or []
     routeData = [] 
@@ -50,7 +54,7 @@ class RouteHandler(metaclass = Singleton):
   def handleRequest(self, req, *handlers):
     self.executeMiddlewares(req, *handlers)
     if self.Mode and self.Mode in self.__modeHandlers:
-      req = self.__modeHandlers[self.Mode].modifyRequest()
+      req = self.__modeHandlers[self.Mode].modifyRequest(req)
     path = req.get('path')
     matchedPath = PathMatch().matchMulti(self.Paths.keys(), path)
     if not matchedPath:
